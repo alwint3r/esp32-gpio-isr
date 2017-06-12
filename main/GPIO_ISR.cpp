@@ -11,15 +11,15 @@ QueueHandle_t qHandle;
 
 static const char* TAG = "gpio_isr";
 
-void pollTask(void* arg);
+void interruptQueueReceiveTask(void* arg);
 void gpioISRHandler(void* arg);
 unsigned long IRAM_ATTR millis();
 
 extern "C" void app_main() {
     nvs_flash_init();
-    qHandle = xQueueCreate(5, sizeof(int));
+    qHandle = xQueueCreate(1, sizeof(int));
 
-    xTaskCreate(pollTask, "pollTask", 2048, NULL, 5, NULL);
+    xTaskCreate(interruptQueueReceiveTask, "interruptQueueReceiveTask", 2048, NULL, 5, NULL);
 }
 
 unsigned long IRAM_ATTR millis() {
@@ -31,7 +31,7 @@ void gpioISRHandler(void* arg) {
     xQueueSendToBackFromISR(qHandle, &level, NULL);
 }
 
-void pollTask(void* arg) {
+void interruptQueueReceiveTask(void* arg) {
     gpio_config_t gpioCfg;
     gpioCfg.pin_bit_mask = GPIO_SEL_0;
     gpioCfg.mode = GPIO_MODE_INPUT;
