@@ -9,7 +9,7 @@
 
 QueueHandle_t qHandle;
 
-static const char* TAG = "buttons";
+static const char* TAG = "gpio_isr";
 
 void pollTask(void* arg);
 void gpioISRHandler(void* arg);
@@ -56,8 +56,6 @@ void pollTask(void* arg) {
 
         if (readLevel == PRESSED_STATE) {
             ESP_LOGI(TAG, "GPIO0 pressed");
-
-            lastPressed = millis();
         } else if (readLevel == RELEASED_STATE) {
             if (lastPressed > 0) {
                 if (millis() - lastPressed > 3000) {
@@ -68,6 +66,8 @@ void pollTask(void* arg) {
             } else {
                 ESP_LOGI(TAG, "GPIO0 released");
             }
+
+            lastPressed = millis();
         }
     }
 }
