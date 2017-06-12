@@ -54,19 +54,16 @@ void pollTask(void* arg) {
         xQueueReceive(qHandle, &readLevel, portMAX_DELAY);
         ESP_LOGI(TAG, "Woken up by Queue wait.");
 
-        if (readLevel == PRESSED_STATE) {
-            ESP_LOGI(TAG, "GPIO0 pressed");
-        } else if (readLevel == RELEASED_STATE) {
-            if (lastPressed > 0) {
-                if (millis() - lastPressed > 3000) {
-                    ESP_LOGI(TAG, "Long pressed");
-                } else {
-                    ESP_LOGI(TAG, "GPIO0 released");
-                }
+        if (readLevel == RELEASED_STATE) {
+            if (lastPressed > 0 && (millis() - lastPressed) > 3000) {
+                ESP_LOGI(TAG, "Long pressed");
             } else {
                 ESP_LOGI(TAG, "GPIO0 released");
             }
+        }
 
+        if (readLevel == PRESSED_STATE) {
+            ESP_LOGI(TAG, "GPIO0 pressed");
             lastPressed = millis();
         }
     }
