@@ -7,12 +7,12 @@
 #include <freertos/queue.h>
 #include <functional>
 
-class GPIOInterruptService {
+class Button {
 public:
     typedef std::function<void(void)> OnButtonActionPerformed;
 
-    GPIOInterruptService(gpio_num_t gpioNum);
-    ~GPIOInterruptService();
+    Button(gpio_num_t gpioNum);
+    ~Button();
     void begin();
     void onPressed(OnButtonActionPerformed callback);
     void onReleased(OnButtonActionPerformed callback);

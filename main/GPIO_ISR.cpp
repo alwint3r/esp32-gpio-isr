@@ -6,26 +6,26 @@
 #include <esp_log.h>
 #include <esp_system.h>
 #include <esp_err.h>
-#include <GPIOInterruptService.h>
+#include <Button.h>
 
 static const char* TAG = "gpio_isr";
-GPIOInterruptService* gpioIntrService;
+Button* button;
 
 extern "C" void app_main() {
     nvs_flash_init();
 
-    gpioIntrService = new GPIOInterruptService(GPIO_NUM_0);
-    gpioIntrService->onPressed([=]() {
+    button = new Button(GPIO_NUM_0);
+    button->onPressed([=]() {
         ESP_LOGI(TAG, "GPIO0 is pressed");
     });
 
-    gpioIntrService->onReleased([=]() {
+    button->onReleased([=]() {
         ESP_LOGI(TAG, "GPIO0 is released");
     });
 
-    gpioIntrService->onLongPressed([=]() {
+    button->onLongPressed([=]() {
         ESP_LOGI(TAG, "GPIO0 is long-pressed");
     });
 
-    gpioIntrService->begin();
+    button->begin();
 }

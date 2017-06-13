@@ -1,16 +1,18 @@
-#include "GPIOInterruptService.h"
+#include "Button.h"
 
-GPIOInterruptService::GPIOInterruptService(gpio_num_t gpioNum)
+Button::Button(gpio_num_t gpioNum)
 :gpioNum(gpioNum) {
     gpioConfig = new gpio_config_t;
     queue = xQueueCreate(1, sizeof(int));
 }
 
-GPIOInterruptService::~GPIOInterruptService() {
+Button::~Button() {
     delete gpioConfig;
+    vTaskDelete(taskHandle);
+    gpio_uninstall_isr_service();
 }
 
-void GPIOInterruptService::begin() {
+void Button::begin() {
     gpioConfig->pin_bit_mask = BIT(gpioNum);
     gpioConfig->mode = GPIO_MODE_INPUT;
     gpioConfig->pull_up_en = GPIO_PULLUP_DISABLE;
@@ -24,30 +26,30 @@ void GPIOInterruptService::begin() {
     xTaskCreate(runTask, "gpioISRTask", 2048, this, 5, &taskHandle);
 }
 
-void GPIOInterruptService::onPressed(OnButtonActionPerformed callback) {
+void Button::onPressed(OnButtonActionPerformed callback) {
     pressedCallback = callback;
 }
 
-void GPIOInterruptService::onReleased(OnButtonActionPerformed callback) {
+void Button::onReleased(OnButtonActionPerformed callback) {
     releasedCallback = callback;
 }
 
-void GPIOInterruptService::onLongPressed(OnButtonActionPerformed callback) {
+void Button::onLongPressed(OnButtonActionPerformed callback) {
     longPressedCallback = callback;
 }
 
-uint32_t GPIOInterruptService::millis() {
+uint32_t Button::millis() {
     return xTaskGetTickCount() * portTICK_PERIOD_MS;
 }
 
-void GPIOInterruptService::isrHandler(void* arg) {
-    GPIOInterruptService* mui = (GPIOInterruptService*)arg;
+void Button::isrHandler(void* arg) {
+    Button* mui = (Button*)arg;
     int level = gpio_get_level(mui->gpioNum);
     xQueueSendToBackFromISR(mui->queue, &level, nullptr);
 }
 
-void GPIOInterruptService::runTask(void* arg) {
-    GPIOInterruptService* mui = (GPIOInterruptService*)arg;
+void Button::runTask(void* arg) {
+    Button* mui = (Button*)arg;
 
     int readLevel;
     uint32_t lastPressed = 0;
